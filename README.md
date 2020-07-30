@@ -60,7 +60,7 @@ sudo chown root clevo-indicator
 sudo chmod u+s  clevo-indicator
 ```
 
-本程序与任何通过低级调用访问 EC 的程序冲突,可能会发生未知的行为,
+本程序与任何通过低级调用访问 EC 的程序冲突,可能会发生未知的行为  
 本程序也没有对 EC 访问做保护
 
 The executable has setuid flag on, but must be run by the current desktop user,
