@@ -1,30 +1,67 @@
-Clevo Fan Control Indicator for Ubuntu
-======================================
+# 蓝天笔记本风扇调速
 
-This program is an Ubuntu indicator to control the fan of Clevo laptops, using reversed-engineering port information from ECView.
+蓝天笔记本调速工具,支持 CPU/GPU
 
-It shows the CPU temperature on the left and the GPU temperature on the right, and a menu for manual control.
+修改自下列项目
 
-![Clevo Indicator Screen](http://i.imgur.com/ucwWxLq.png)
+- https://github.com/davidrohr/clevo-indicator
+- https://github.com/SkyLandTW/clevo-indicator
 
+做了以下修改
 
+- 已解锁 GUI 手工调速下限为 40%
+- 汉化了说明,挖掘了更多参数
 
-For command-line, use *-h* to display help, or a number representing percentage of fan duty to control the fan (from 40% to 100%).
+## 构建/Build
 
-
-Build and Install
------------------
-
-```shell
-sudo apt-get install libappindicator3-dev libgtk-3-dev
-git clone https://github.com/SkyLandTW/clevo-indicator.git
+```bash
+# For Ubuntu/Debian
+sudo apt install libappindicator3-dev libgtk-3-dev
+git clone https://github.com/gzzchh/clevo-indicator
 cd clevo-indicator
 make install
 ```
 
+```bash
+# For CentOS/Fedora
+sudo dnf install \
+libappindicator-gtk3-devel \
+libappindicator-gtk3 \
+libappindicator \
+libappindicator-devel
+git clone https://github.com/gzzchh/clevo-indicator
+cd clevo-indicator
+make install
+```
 
-Notes
------
+## 用法/Usage
+
+clevo-indicator set [fan-duty-percentage(int)] 设定 CPU 风扇百分比  
+clevo-indicator setg [fan-duty-percentage(int)] 设定 GPU 风扇百分比  
+clevo-indicator help 打印帮助  
+clevo-indicator dump 获取温度  
+clevo-indicator dumpall 获取温度(原始数据)  
+clevo-indicator auto 自动设定风扇速度并退出(适合定时脚本)  
+clevo-indicator indicator 显示调速 GUI
+
+fan-duty-percentage 是一个 int  
+指定风扇百分比
+
+## 笔记/Note
+
+简单来说调用 EC 接口需要 root 权限  
+但是一般 Linux 桌面都是给普通用户的  
+所以你需要 setuid
+
+操作方法如下
+
+```bash
+sudo chown root clevo-indicator
+sudo chmod u+s  clevo-indicator
+```
+
+本程序与任何通过低级调用访问 EC 的程序冲突,可能会发生未知的行为,
+本程序也没有对 EC 访问做保护
 
 The executable has setuid flag on, but must be run by the current desktop user,
 because only the desktop user is allowed to display a desktop indicator in
@@ -42,3 +79,22 @@ before other actions can be performed... The program also attempts to prevent
 abortion while issuing commands by catching all termination signals except
 SIGKILL - don't kill the indicator by "kill -9" unless absolutely necessary.
 
+## 修改/Hack
+
+如果想要给 GUI 菜单添加更多的选项,可以去 `clevo-indicator.c` 第 138 行左右  
+找到一个数组,然后 Just Copy
+
+```c
+static menuitems[] = {
+    {"Set FAN to AUTO", G_CALLBACK(ui_command_set_fan), 0, AUTO, NULL},
+    {"", NULL, 0L, NA, NULL},
+    {"Set FAN to  40%", G_CALLBACK(ui_command_set_fan), 40, MANUAL, NULL},
+    {"Set FAN to  50%", G_CALLBACK(ui_command_set_fan), 50, MANUAL, NULL},
+    {"Set FAN to  60%", G_CALLBACK(ui_command_set_fan), 60, MANUAL, NULL},
+    {"Set FAN to  70%", G_CALLBACK(ui_command_set_fan), 70, MANUAL, NULL},
+    {"Set FAN to  80%", G_CALLBACK(ui_command_set_fan), 80, MANUAL, NULL},
+    {"Set FAN to  90%", G_CALLBACK(ui_command_set_fan), 90, MANUAL, NULL},
+    {"Set FAN to 100%", G_CALLBACK(ui_command_set_fan), 100, MANUAL, NULL},
+    {"", NULL, 0L, NA, NULL},
+    {"Quit", G_CALLBACK(ui_command_quit), 0L, NA, NULL}};
+```
