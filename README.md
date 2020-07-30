@@ -98,3 +98,19 @@ static menuitems[] = {
     {"", NULL, 0L, NA, NULL},
     {"Quit", G_CALLBACK(ui_command_quit), 0L, NA, NULL}};
 ```
+
+关于百分比计算规则,目前是放在 `clevo-indicator.c` 第 884 行左右,如下
+
+```c
+static int ec_auto_duty_adjust(void)
+{
+    int temp = MAX(share_info->cpu_temp, share_info->gpu_temp);
+    int duty = share_info->fan_duty;
+    //
+    if (temp >= 80 && duty < 100)
+        return 100;
+    // 篇幅关系 省略大部分
+    //
+    return 0;
+}
+```
