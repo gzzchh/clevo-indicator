@@ -488,11 +488,15 @@ DO NOT MANIPULATE OR QUERY EC I/O PORTS WHILE THIS PROGRAM IS RUNNING.\n\
     }
     else if (strcmp(argv[1], "indicator") == 0)
     {
+        // 有个奇怪的现象,启动GUI似乎会提升风扇速度
+        // 这里强制启动GUI时使用最小速度 40
+        main_test_cpu_fan(40);
         char *display = getenv("DISPLAY");
         if (display == NULL || strlen(display) == 0)
         {
             return main_dump_fan();
         }
+        // 如果有显示,则启动GUI
         else
         {
             parent_pid = getpid();
